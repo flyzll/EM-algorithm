@@ -1,82 +1,129 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
-np.random.seed(42)
+np.random.seed()
+
 
 def generate_object(center, cov, n_points):
     return np.random.multivariate_normal(center, cov, n_points)
 
-# ---- 3D点群 ----
 points = np.vstack([
     generate_object([2, 2, 2],
-                    [[0.1, 0, 0],
-                     [0, 0.1, 0],
-                     [0, 0, 0.1]], 150),
+                    [[0.3, 0.0, 0.0],
+                     [0.0, 0.3, 0.0],
+                     [0.0, 0.0, 0.3]], 300),
 
-    generate_object([5, 3, 1],
-                    [[0.2, 0.05, 0],
-                     [0.05, 0.1, 0],
-                     [0, 0, 0.1]], 150),
+    generate_object([2, 10, 3],
+                    [[0.3, 0.3, 0.0],
+                     [0.0, 0.3, 0.0],
+                     [0.0, 0.0, 0.3]], 300),
 
-    generate_object([7, 7, 3],
-                    [[0.1, -0.03, 0],
-                     [-0.03, 0.2, 0],
-                     [0, 0, 0.1]], 150)
+    generate_object([10, 14, 15],
+                    [[0.3, 0.0, 0.0],
+                     [0.0, 0.3, 0.0],
+                     [0.0, 0.0, 0.3]], 300)
 ])
 
-N, dimension = points.shape   # dimension = 3
-object = 100
 
-#EM法
-mu = points[np.random.choice(N, object, replace=False)]
-Sigma = np.array([np.eye(dimension) for _ in range(object)])
-pi = np.ones(object) / object
+N, dim = points.shape
 
+K = 100
+
+# ======================
+# 初期化
+# ======================
+mu = points[np.random.choice(N, K, replace=True)]
+Sigma = np.array([np.eye(dim) for _ in range(K)])
+pi = np.ones(K) / K
+
+# ======================
+# ガウス分布
+# ======================
 def gaussian(x, mu, Sigma):
-    d = x.shape[1]
     diff = x - mu
     inv = np.linalg.inv(Sigma)
     det = np.linalg.det(Sigma)
-    norm = 1.0 / np.sqrt((2 * np.pi)**d * det)
+    norm = 1.0 / np.sqrt((2 * np.pi)**dim * det)
     return norm * np.exp(-0.5 * np.sum(diff @ inv * diff, axis=1))
 
-for _ in range(100):
-    # E-step
-    gamma = np.zeros((N, object))
-    for k in range(object):
-        gamma[:, k] = pi[k] * gaussian(points, mu[k], Sigma[k])
-    gamma /= gamma.sum(axis=1, keepdims=True)
+tol = 1e-3         # 中心変化の許容値
+stable_limit = 3    # 連続回数
+stable_count = 0
+mu_prev = None
 
-    # M-step
+
+for iteration in range(1000):
+    # ---------- E-step ----------
+    gamma = np.zeros((N, K))
+    for k in range(K):
+        gamma[:, k] = pi[k] * gaussian(points, mu[k], Sigma[k])
+
+    gamma_sum = gamma.sum(axis=1, keepdims=True)
+    gamma_sum[gamma_sum == 0] = 1e-12
+    gamma /= gamma_sum
+
+    # ---------- M-step ----------
     Nk = gamma.sum(axis=0)
-    for k in range(object):
+
+    for k in range(K):
+        if Nk[k] < 1e-6:
+            continue
+
         mu[k] = np.sum(gamma[:, k, None] * points, axis=0) / Nk[k]
+
         diff = points - mu[k]
-        Sigma[k] = (gamma[:, k, None, None] *
-                    np.einsum('ni,nj->nij', diff, diff)).sum(axis=0) / Nk[k]
+        Sigma[k] = (
+            gamma[:, k, None, None]
+            * np.einsum('ni,nj->nij', diff, diff)
+        ).sum(axis=0) / Nk[k]
+
         pi[k] = Nk[k] / N
 
-    threshold = 0.01  # 全体の1%未満は削除
+    threshold = 0.01   # 全体の1%未満
     valid = pi > threshold
+
     mu = mu[valid]
     Sigma = Sigma[valid]
     pi = pi[valid]
 
-    # 正規化（合計を1に戻す）
-    pi = pi / pi.sum()
+    pi /= pi.sum()
+    K = len(pi)
 
-    object = len(pi)  # クラスタ数を更新
+    print(f"iter {iteration}: K = {K}")
+
+    # ---------- 収束判定 ----------
+    if mu_prev is not None and mu.shape == mu_prev.shape:
+        diff = np.linalg.norm(mu - mu_prev)
+
+        if diff < tol:
+            stable_count += 1
+            #print(f"  center change small ({stable_count}/{stable_limit})")
+        else:
+            stable_count = 0
+
+        if stable_count >= stable_limit:
+            print("Centers converged. Stop EM.")
+            break
+
+    mu_prev = mu.copy()
+
+
+gamma = np.zeros((N, K))
+for k in range(K):
+    gamma[:, k] = pi[k] * gaussian(points, mu[k], Sigma[k])
+gamma /= gamma.sum(axis=1, keepdims=True)
 
 labels = np.argmax(gamma, axis=1)
+
+print(mu)
+from mpl_toolkits.mplot3d import Axes3D
 
 fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(111, projection='3d')
 
-for k in range(object):
+for k in range(K):
     cluster = points[labels == k]
-    ax.scatter(cluster[:, 0], cluster[:, 1], cluster[:, 2],
-               s=10, label=f"Object {k+1}")
+    ax.scatter(cluster[:, 0], cluster[:, 1], cluster[:, 2], s=10)
 
     ax.scatter(mu[k][0], mu[k][1], mu[k][2],
                c='black', marker='x', s=100)
@@ -84,6 +131,5 @@ for k in range(object):
 ax.set_xlabel("X")
 ax.set_ylabel("Y")
 ax.set_zlabel("Z")
-ax.set_title("3D Object Detection using EM (GMM)")
-ax.legend()
+ax.set_title(f"3D EM with Over-clustering (Final K = {K})")
 plt.show()
