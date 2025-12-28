@@ -1,11 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 np.random.seed()
 
-
 def generate_object(center, cov, n_points):
     return np.random.multivariate_normal(center, cov, n_points)
+
+def gaussian(x, mu, Sigma):
+    diff = x - mu
+    inv = np.linalg.inv(Sigma)
+    det = np.linalg.det(Sigma)
+    norm = 1.0 / np.sqrt((2 * np.pi)**dim * det)
+    return norm * np.exp(-0.5 * np.sum(diff @ inv * diff, axis=1))
 
 points = np.vstack([
     generate_object([2, 2, 2],
@@ -24,31 +31,17 @@ points = np.vstack([
                      [0.0, 0.0, 0.3]], 300)
 ])
 
-
 N, dim = points.shape
 
-K = 100
+K = 100 #初期クラスタ数
 
-# ======================
-# 初期化
-# ======================
-mu = points[np.random.choice(N, K, replace=True)]
-Sigma = np.array([np.eye(dim) for _ in range(K)])
-pi = np.ones(K) / K
-
-# ======================
-# ガウス分布
-# ======================
-def gaussian(x, mu, Sigma):
-    diff = x - mu
-    inv = np.linalg.inv(Sigma)
-    det = np.linalg.det(Sigma)
-    norm = 1.0 / np.sqrt((2 * np.pi)**dim * det)
-    return norm * np.exp(-0.5 * np.sum(diff @ inv * diff, axis=1))
+mu = points[np.random.choice(N, K, replace=True)] #平均値
+Sigma = np.array([np.eye(dim) for _ in range(K)]) #共分散
+pi = np.ones(K) / K  # 混合係数
 
 tol = 1e-3         # 中心変化の許容値
-stable_limit = 3    # 連続回数
-stable_count = 0
+stable_limit = 3    # 連続回数（満たしたら終了）
+stable_count = 0    # 連続カウンタ
 mu_prev = None
 
 
@@ -114,9 +107,6 @@ for k in range(K):
 gamma /= gamma.sum(axis=1, keepdims=True)
 
 labels = np.argmax(gamma, axis=1)
-
-print(mu)
-from mpl_toolkits.mplot3d import Axes3D
 
 fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(111, projection='3d')
