@@ -19,6 +19,6 @@ cd propablistic-robotics
 python3 EM.py
 ```
 ## 出力例
-iter 257: K = 37   # iter: EM法の反復回数, K: クラスタ数
-<img width="634" height="571" alt="Image" src="https://github.com/user-attachments/assets/b024a83b-e52e-4046-8f5f-b05aa1e05ce4" />
+iter 114: K = 5   # iter: EM法の反復回数, K: クラスタ数
+<img width="634" height="615" alt="Image" src="https://github.com/user-attachments/assets/f8a4d4c3-ce6d-4e7a-801d-7c8c14ca4387" />
 
