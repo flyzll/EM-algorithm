@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
             if stable_count >= stable_limit:
                 print(f"iter {iteration}: K = {K}")
-                print("Stop EM.")
+                #print("Stop EM.")
                 break
 
         mu_prev = mu.copy()
