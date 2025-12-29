@@ -19,7 +19,9 @@ cd propablistic-robotics
 python3 EM.py
 ```
 ## 出力例
-- EMalgorithmの試行回数(iter)と残存したクラスタの中心の数(K)が表示され3Dのプロットがおこなわれる．  
+EMalgorithmの試行回数(iter)と残存したクラスタの中心の数(K)が表示され3Dのプロットがおこなわれる．  
+```
 iter 114: K = 5   
+```
 <img width="634" height="615" alt="Image" src="https://github.com/user-attachments/assets/f8a4d4c3-ce6d-4e7a-801d-7c8c14ca4387" />
 
