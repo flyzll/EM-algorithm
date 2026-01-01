@@ -61,7 +61,7 @@ pi = np.ones(K) / K
 
 if __name__ == "__main__":
 
-    for iteration in range(1000):
+    for iteration in range(100):
         # E-step
         gamma = np.zeros((N, K))
         for k in range(K):
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
         # M-step 
         Nk = gamma.sum(axis=0)
-
+        print(Nk)
         for k in range(K):
             if Nk[k] < 1e-6:
                 continue
