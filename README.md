@@ -15,17 +15,27 @@
 ## プログラムの内容
 1. Estep 
 次の式より任意の点nが任意のクラスタkに属する事後分布γnkを計算する.  
-<img width="213" height="50" alt="Image" src="https://github.com/user-attachments/assets/7e0cc076-a08b-4524-9df3-93e93a11745e" />
+<img width="213" height="50" alt="Image" src="https://github.com/user-attachments/assets/7e0cc076-a08b-4524-9df3-93e93a11745e" />  
 
 
 2. Mstep  
 Estepで求めたγを使いクラスタに含まれるデータ数であるNkを求める．  
-<img width="95" height="53" alt="Image" src="https://github.com/user-attachments/assets/e4060751-1f3a-4b4c-a1f6-1f490461ac66" />
-Nkを利用し各クラスタの大きさ，平均値，共分散行列を求める．
-<img width="67" height="38" alt="Image" src="https://github.com/user-attachments/assets/6209f60f-b6da-4193-aa0a-1fffa8b5ef52" /> 
-<img width="144" height="53" alt="Image" src="https://github.com/user-attachments/assets/440dda7a-223f-4e61-8468-164a307d9589" />
+N_k = Σ_n γ[n,k]
 
-<img width="285" height="53" alt="Image" src="https://github.com/user-attachments/assets/1ed5096a-e331-4fe8-902b-4b050c882b94" />
+μ[k] = (1 / N_k) * Σ_n γ[n,k] * x[n]
+
+Σ[k] = (1 / N_k) * Σ_n γ[n,k]
+       * (x[n] - μ[k]) (x[n] - μ[k])^T
+
+π[k] = N_k / N
+
+<img width="95" height="53" alt="Image" src="https://github.com/user-attachments/assets/e4060751-1f3a-4b4c-a1f6-1f490461ac66" />  
+
+Nkを利用し各クラスタの大きさ，平均値，共分散行列を求める．
+<img width="67" height="38" alt="Image" src="https://github.com/user-attachments/assets/6209f60f-b6da-4193-aa0a-1fffa8b5ef52" />   
+<img width="144" height="53" alt="Image" src="https://github.com/user-attachments/assets/440dda7a-223f-4e61-8468-164a307d9589" />  
+
+<img width="285" height="53" alt="Image" src="https://github.com/user-attachments/assets/1ed5096a-e331-4fe8-902b-4b050c882b94" />  
 
 1,2を繰り返すことにより，クラスタがそれぞれの点群データのまとまりによるため，クラスタリングが可能となる.  
 
