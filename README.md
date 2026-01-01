@@ -20,18 +20,9 @@
 
 2. Mstep  
 Estepで求めたγを使いクラスタに含まれるデータ数であるNkを求める．  
-N_k = Σ_n γ[n,k]
-
-μ[k] = (1 / N_k) * Σ_n γ[n,k] * x[n]
-
-Σ[k] = (1 / N_k) * Σ_n γ[n,k]
-       * (x[n] - μ[k]) (x[n] - μ[k])^T
-
-π[k] = N_k / N
-
 <img width="95" height="53" alt="Image" src="https://github.com/user-attachments/assets/e4060751-1f3a-4b4c-a1f6-1f490461ac66" />  
 
-Nkを利用し各クラスタの大きさ，平均値，共分散行列を求める．
+Nkを利用し各クラスタの大きさ，平均値，共分散行列を求める．  
 <img width="67" height="38" alt="Image" src="https://github.com/user-attachments/assets/6209f60f-b6da-4193-aa0a-1fffa8b5ef52" />   
 <img width="144" height="53" alt="Image" src="https://github.com/user-attachments/assets/440dda7a-223f-4e61-8468-164a307d9589" />  
 
